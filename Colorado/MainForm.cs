@@ -262,7 +262,7 @@ namespace Colorado
 
         private void bClear_Click(object sender, EventArgs e)
         {
-            bmp = new Bitmap(sizeX, sizeY);
+            bmp = new Bitmap(sizeX, sizeY); 
             pbox.Image = bmp;
 
             rbFigure.Enabled = false;
