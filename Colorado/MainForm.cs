@@ -8,31 +8,27 @@ namespace Colorado
 {
     public partial class MainForm : Form
     {
-        const int sizeX = 1000;
-        const int sizeY = 400;
-        Bitmap bmp = new Bitmap(sizeX, sizeY);
+        const int SizeX = 1000;
+        const int SizeY = 400;
+        Bitmap _bmp = new Bitmap(SizeX, SizeY);
 
-        Pen pen = new Pen(Color.Black, 50);
-        Brush _brush = new System.Drawing.SolidBrush(Color.Black);
-        bool _penSelected = false;
-        bool _canDraw = false;
-        bool _canFill = false;
-        bool clicked = false;
-        const int pointSize = 50;
-        const int pointSize2 = (int)(pointSize * 0.5);
-        int countInside = 0;
-        Color oldColor;
-        List<Point> points = new List<Point>();
-        List<Point> buttonMovePoints = new List<Point>();
+        Pen _pen = new Pen(Color.Black, 50);
+        Brush _brush = new SolidBrush(Color.Black);
+        bool _penSelected;
+        bool _canDraw;
+        bool _canFill;
+        bool _clicked;
+        const int PointSize = 50;
+        const int PointSize2 = (int)(PointSize * 0.5);
+        Color _oldColor;
 
         // 3d
-        int pointsNumber;
-        List<Point> points3;
-        bool canSet = false;
-        bool makeFun = false;
-        List<Double> angles = new List<Double>();
+        int _pointsNumber;
+        List<Point> _points3;
+        bool _canSet;
+        List<Double> _angles = new List<Double>();
 
-        Color fillColor = Color.Black;
+        Color _fillColor = Color.Black;
 
 
 
@@ -41,10 +37,17 @@ namespace Colorado
             InitializeComponent();
         }
 
-        void drawPen(Bitmap bmp, Brush brush, Point point)
+        public List<double> Angles
+        {
+            get { return _angles; }
+            set { _angles = value; }
+        }
+
+
+        void DrawPen(Bitmap bmp, Brush brush, Point point)
         {
             Graphics g = Graphics.FromImage(bmp);
-            g.FillEllipse(brush, point.X - pointSize2, point.Y - pointSize2, pointSize, pointSize);
+            g.FillEllipse(brush, point.X - PointSize2, point.Y - PointSize2, PointSize, PointSize);
         }
 
         private void bPen_Click(object sender, EventArgs e)
@@ -55,11 +58,11 @@ namespace Colorado
 
         private void pbox_MouseMove(object sender, MouseEventArgs e)
         {
-            MouseEventArgs mouseEvents = (MouseEventArgs)e;
-            if (_penSelected && clicked)
+            MouseEventArgs mouseEvents = e;
+            if (_penSelected && _clicked)
             {
-                drawPen(bmp, _brush, mouseEvents.Location);
-                pbox.Image = bmp;
+                DrawPen(_bmp, _brush, mouseEvents.Location);
+                pbox.Image = _bmp;
             }
         }
 
@@ -72,13 +75,13 @@ namespace Colorado
 
             if (_canFill)
             {
-                oldColor = bmp.GetPixel(mouseEvents.X, mouseEvents.Y);
+                _oldColor = _bmp.GetPixel(mouseEvents.X, mouseEvents.Y);
 
                 DateTime startTime = DateTime.Now, endTime = DateTime.Now;
                 if (rbRecursive.Checked)
                 {
                     startTime = DateTime.Now;
-                    Thread T = new Thread(() => recursiveFill(bmp, mouseEvents.X, mouseEvents.Y, oldColor, fillColor), 100000000);
+                    Thread T = new Thread(() => RecursiveFill(_bmp, mouseEvents.X, mouseEvents.Y, _oldColor, _fillColor), 100000000);
                     T.Start();
                     T.Join();
                     T.Abort();
@@ -88,119 +91,119 @@ namespace Colorado
                     if (rbLoop.Checked)
                     {
                         startTime = DateTime.Now;
-                        loopFill(bmp, mouseEvents.Location, oldColor, fillColor);
+                        LoopFill(_bmp, mouseEvents.Location, _oldColor, _fillColor);
                         endTime = DateTime.Now;
                     }
                     else
                         if (rbFigure.Checked)
                         {
                             startTime = DateTime.Now;
-                            anglesFill(bmp, points3, oldColor, fillColor);
-                            drawFigure();
-                            for (int i = 0; i < points3.Count; i++)
-                                drawPen(bmp, _brush, points3[i]);
+                            anglesFill(_bmp, _points3, _fillColor);
+                            DrawFigure();
+                            for (int i = 0; i < _points3.Count; i++)
+                                DrawPen(_bmp, _brush, _points3[i]);
                             endTime = DateTime.Now;
                         }
 
-                pbox.Image = bmp;
+                pbox.Image = _bmp;
                 lTime.Visible = true;
                 tTime.Visible = true;
                 tTime.Text = Convert.ToString(endTime - startTime);
-                bmp.Save("1.bmp");
+                _bmp.Save("1.bmp");
             }
 
-            if (canSet)
+            if (_canSet)
             {
-                drawPen(bmp, _brush, mouseEvents.Location);
-                points3.Add(mouseEvents.Location);
-                pbox.Image = bmp;
-                pointsNumber++;
-                if (pointsNumber == 3)
+                DrawPen(_bmp, _brush, mouseEvents.Location);
+                _points3.Add(mouseEvents.Location);
+                pbox.Image = _bmp;
+                _pointsNumber++;
+                if (_pointsNumber == 3)
                     bDone.Enabled = true;
             }
         }
 
-        void recursiveFill(Bitmap bmp, int X, int Y, Color oldColor, Color newColor)
+        void RecursiveFill(Bitmap bmp, int x, int y, Color oldColor, Color newColor)
         {
-            countInside++;
-            if (0 <= X && X < sizeX && 0 <= Y && Y < sizeY && bmp.GetPixel(X, Y) == oldColor)
+            if (0 <= x && x < SizeX && 0 <= y && y < SizeY && bmp.GetPixel(x, y) == oldColor)
             {
-                bmp.SetPixel(X, Y, newColor);
-                recursiveFill(bmp, X - 1, Y, oldColor, newColor);
-                recursiveFill(bmp, X, Y - 1, oldColor, newColor);
-                recursiveFill(bmp, X, Y + 1, oldColor, newColor);
-                recursiveFill(bmp, X + 1, Y, oldColor, newColor);
+                bmp.SetPixel(x, y, newColor);
+                RecursiveFill(bmp, x - 1, y, oldColor, newColor);
+                RecursiveFill(bmp, x, y - 1, oldColor, newColor);
+                RecursiveFill(bmp, x, y + 1, oldColor, newColor);
+                RecursiveFill(bmp, x + 1, y, oldColor, newColor);
             }
 
         }
 
-        void loopFill(Bitmap bmp, Point startPoint, Color oldColor, Color newColor)
+        void LoopFill(Bitmap bmp, Point startPoint, Color oldColor, Color newColor)
         {
-            List<int> X = new List<int>();
-            List<int> Y = new List<int>();
-            X.Add(startPoint.X);
-            Y.Add(startPoint.Y);
+            List<int> x = new List<int>();
+            List<int> y = new List<int>();
+            x.Add(startPoint.X);
+            y.Add(startPoint.Y);
 
-            while (X.Count != 0)
+            while (x.Count != 0)
             {
-                if (0 <= X[0] && X[0] < sizeX && 0 <= Y[0] && Y[0] < sizeY && bmp.GetPixel(X[0], Y[0]) == oldColor)
+                if (0 <= x[0] && x[0] < SizeX && 0 <= y[0] && y[0] < SizeY && bmp.GetPixel(x[0], y[0]) == oldColor)
                 {
-                    bmp.SetPixel(X[0], Y[0], newColor);
+                    bmp.SetPixel(x[0], y[0], newColor);
 
-                    X.Add(X[0] - 1);
-                    Y.Add(Y[0]);
+                    x.Add(x[0] - 1);
+                    y.Add(y[0]);
 
-                    X.Add(X[0]);
-                    Y.Add(Y[0] - 1);
+                    x.Add(x[0]);
+                    y.Add(y[0] - 1);
 
-                    X.Add(X[0]);
-                    Y.Add(Y[0] + 1);
+                    x.Add(x[0]);
+                    y.Add(y[0] + 1);
 
-                    X.Add(X[0] + 1);
-                    Y.Add(Y[0]);
+                    x.Add(x[0] + 1);
+                    y.Add(y[0]);
                 }
-                X.RemoveAt(0);
-                Y.RemoveAt(0);
+                x.RemoveAt(0);
+                y.RemoveAt(0);
             }
         }
 
-        void anglesFill(Bitmap bmp, List<Point> figure, Color oldColor, Color newColor)
+
+        void anglesFill(Bitmap bmp, List<Point> figure, Color newColor)
         {
-            int XMin = figure[0].X;
-            int XMax = figure[0].X;
-            int YMin = figure[0].Y;
-            int YMax = figure[0].Y;
+            int xMin = figure[0].X;
+            int xMax = figure[0].X;
+            int yMin = figure[0].Y;
+            int yMax = figure[0].Y;
             for (int i = 1; i < figure.Count; i++)
             {
-                if (figure[i].X < XMin)
-                    XMin = figure[i].X;
+                if (figure[i].X < xMin)
+                    xMin = figure[i].X;
                 else
-                    if (XMax < figure[i].X)
-                        XMax = figure[i].X;
-                if (figure[i].Y < YMin)
-                    YMin = figure[i].Y;
+                    if (xMax < figure[i].X)
+                        xMax = figure[i].X;
+                if (figure[i].Y < yMin)
+                    yMin = figure[i].Y;
                 else
-                    if (YMax < figure[i].Y)
-                        YMax = figure[i].Y;
+                    if (yMax < figure[i].Y)
+                        yMax = figure[i].Y;
             }
 
-            for (int X = XMin; X <= XMax; X++)
-                for (int Y = YMin; Y <= YMax; Y++)
+            for (int x = xMin; x <= xMax; x++)
+                for (int y = yMin; y <= yMax; y++)
                 {
                     Double angle = 0;
                     for (int i = 0; i < figure.Count - 1; i++)
                     {
-                        double angleI = Math.Abs((Math.Atan2(Y - figure[i].Y, X - figure[i].X) - Math.Atan2(Y - figure[i + 1].Y, X - figure[i + 1].X)) * 180 / (double)Math.PI);
+                        double angleI = Math.Abs((Math.Atan2(y - figure[i].Y, x - figure[i].X) - Math.Atan2(y - figure[i + 1].Y, x - figure[i + 1].X)) * 180 / Math.PI);
                         if (angleI > 180)
                             angleI = 360 - angleI;
                         angle += angleI;
                     }
-                    double angleJ = Math.Abs((Math.Atan2(Y - figure[figure.Count - 1].Y, X - figure[figure.Count - 1].X) - Math.Atan2(Y - figure[0].Y, X - figure[0].X)) * 180 / (double)Math.PI);
+                    double angleJ = Math.Abs((Math.Atan2(y - figure[figure.Count - 1].Y, x - figure[figure.Count - 1].X) - Math.Atan2(y - figure[0].Y, x - figure[0].X)) * 180 / Math.PI);
                     if (angleJ > 180)
                         angleJ = 360 - angleJ;
                     angle += angleJ;
                     if (Math.Abs(angle - 360) < 1)
-                        bmp.SetPixel(X, Y, newColor);
+                        bmp.SetPixel(x, y, newColor);
                 }
         }
 
@@ -212,17 +215,17 @@ namespace Colorado
 
         private void pbox_MouseUp(object sender, MouseEventArgs e)
         {
-            clicked = false;
+            _clicked = false;
         }
 
         private void pbox_MouseDown(object sender, MouseEventArgs e)
         {
-            clicked = true;
-            MouseEventArgs mouseEvents = (MouseEventArgs)e;
+            _clicked = true;
+            MouseEventArgs mouseEvents = e;
             if (_penSelected)
             {
-                drawPen(bmp, _brush, mouseEvents.Location);
-                pbox.Image = bmp;
+                DrawPen(_bmp, _brush, mouseEvents.Location);
+                pbox.Image = _bmp;
             }
         }
 
@@ -231,18 +234,18 @@ namespace Colorado
             bPen.Enabled = false;
             bFill.Enabled = false;
             bSet.Enabled = false;
-            pointsNumber = 0;
-            points3 = new List<Point>();
-            canSet = true;
+            _pointsNumber = 0;
+            _points3 = new List<Point>();
+            _canSet = true;
         }
 
-        void drawFigure()
+        void DrawFigure()
         {
-            Graphics g = Graphics.FromImage(bmp);
-            for (int i = 0; i < pointsNumber - 1; i++)
-                g.DrawLine(pen, points3[i], points3[i + 1]);
-            g.DrawLine(pen, points3[pointsNumber - 1], points3[0]);
-            pbox.Image = bmp;
+            Graphics g = Graphics.FromImage(_bmp);
+            for (int i = 0; i < _pointsNumber - 1; i++)
+                g.DrawLine(_pen, _points3[i], _points3[i + 1]);
+            g.DrawLine(_pen, _points3[_pointsNumber - 1], _points3[0]);
+            pbox.Image = _bmp;
         }
 
         private void bDone_Click(object sender, EventArgs e)
@@ -251,15 +254,15 @@ namespace Colorado
             bFill.Enabled = true;
             bSet.Enabled = true;
             bDone.Enabled = false;
-            canSet = false;
-            drawFigure();
+            _canSet = false;
+            DrawFigure();
             rbFigure.Enabled = true; 
         }
 
         private void bClear_Click(object sender, EventArgs e)
         {
-            bmp = new Bitmap(sizeX, sizeY);
-            pbox.Image = bmp;
+            _bmp = new Bitmap(SizeX, SizeY);
+            pbox.Image = _bmp;
 
             rbFigure.Enabled = false;
             if (rbFigure.Checked)
@@ -278,8 +281,8 @@ namespace Colorado
         {
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
-                fillColor = colorDialog.Color;
-                cbox.BackColor = fillColor;
+                _fillColor = colorDialog.Color;
+                cbox.BackColor = _fillColor;
             }
         }
 
@@ -287,7 +290,7 @@ namespace Colorado
         {
             if (colorDialogPen.ShowDialog() == DialogResult.OK)
             {
-                pen = new Pen(colorDialogPen.Color, 50);
+                _pen = new Pen(colorDialogPen.Color, 50);
                 _brush = new SolidBrush(colorDialogPen.Color);
                 cboxPen.BackColor = colorDialogPen.Color;
             }
