@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -17,10 +13,10 @@ namespace Colorado
         Bitmap bmp = new Bitmap(sizeX, sizeY);
 
         Pen pen = new Pen(Color.Black, 50);
-        Brush brush = new System.Drawing.SolidBrush(Color.Black);
-        bool penSelected = false;
-        bool canDraw = false;
-        bool canFill = false;
+        Brush _brush = new System.Drawing.SolidBrush(Color.Black);
+        bool _penSelected = false;
+        bool _canDraw = false;
+        bool _canFill = false;
         bool clicked = false;
         const int pointSize = 50;
         const int pointSize2 = (int)(pointSize * 0.5);
@@ -53,28 +49,28 @@ namespace Colorado
 
         private void bPen_Click(object sender, EventArgs e)
         {
-            penSelected = true;
-            canFill = false;
+            _penSelected = true;
+            _canFill = false;
         }
 
         private void pbox_MouseMove(object sender, MouseEventArgs e)
         {
-            MouseEventArgs mouse_events = (MouseEventArgs)e;
-            if (penSelected && clicked)
+            MouseEventArgs mouseEvents = (MouseEventArgs)e;
+            if (_penSelected && clicked)
             {
-                drawPen(bmp, brush, mouse_events.Location);
+                drawPen(bmp, _brush, mouseEvents.Location);
                 pbox.Image = bmp;
             }
         }
 
         private void pbox_Click(object sender, EventArgs e)
         {
-            canDraw = !canDraw;
+            _canDraw = !_canDraw;
             MouseEventArgs mouseEvents = (MouseEventArgs)e;
 
             //prevPoint = mouseEvents.Location;
 
-            if (canFill)
+            if (_canFill)
             {
                 oldColor = bmp.GetPixel(mouseEvents.X, mouseEvents.Y);
 
@@ -102,7 +98,7 @@ namespace Colorado
                             anglesFill(bmp, points3, oldColor, fillColor);
                             drawFigure();
                             for (int i = 0; i < points3.Count; i++)
-                                drawPen(bmp, brush, points3[i]);
+                                drawPen(bmp, _brush, points3[i]);
                             endTime = DateTime.Now;
                         }
 
@@ -115,7 +111,7 @@ namespace Colorado
 
             if (canSet)
             {
-                drawPen(bmp, brush, mouseEvents.Location);
+                drawPen(bmp, _brush, mouseEvents.Location);
                 points3.Add(mouseEvents.Location);
                 pbox.Image = bmp;
                 pointsNumber++;
@@ -210,8 +206,8 @@ namespace Colorado
 
         private void bFill_Click(object sender, EventArgs e)
         {
-            canFill = true;
-            penSelected = false;
+            _canFill = true;
+            _penSelected = false;
         }
 
         private void pbox_MouseUp(object sender, MouseEventArgs e)
@@ -223,9 +219,9 @@ namespace Colorado
         {
             clicked = true;
             MouseEventArgs mouseEvents = (MouseEventArgs)e;
-            if (penSelected)
+            if (_penSelected)
             {
-                drawPen(bmp, brush, mouseEvents.Location);
+                drawPen(bmp, _brush, mouseEvents.Location);
                 pbox.Image = bmp;
             }
         }
@@ -257,12 +253,12 @@ namespace Colorado
             bDone.Enabled = false;
             canSet = false;
             drawFigure();
-            rbFigure.Enabled = true;
+            rbFigure.Enabled = true; 
         }
 
         private void bClear_Click(object sender, EventArgs e)
         {
-            bmp = new Bitmap(sizeX, sizeY); 
+            bmp = new Bitmap(sizeX, sizeY);
             pbox.Image = bmp;
 
             rbFigure.Enabled = false;
@@ -292,7 +288,7 @@ namespace Colorado
             if (colorDialogPen.ShowDialog() == DialogResult.OK)
             {
                 pen = new Pen(colorDialogPen.Color, 50);
-                brush = new System.Drawing.SolidBrush(colorDialogPen.Color);
+                _brush = new SolidBrush(colorDialogPen.Color);
                 cboxPen.BackColor = colorDialogPen.Color;
             }
         }
